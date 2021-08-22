@@ -4,8 +4,9 @@ Scans through python files, collects all imports and filters out internal ones. 
 
 # Examples
 
-
-# TODO
-
-- [ ] handle `import a as b`
-- [ ] filter out internal modules
+```
+# python-detect-deps .
+cryptography
+requests
+six
+```
