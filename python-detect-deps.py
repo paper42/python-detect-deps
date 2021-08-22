@@ -43,7 +43,7 @@ def process_file(path: str, internal_modules: List[str]) -> List[str]:
             continue
         if line[0] == "import":
             modules += line[1:]
-        elif line[0] == "from":
+        elif line[0] == "from" and len(line) >= 3 and line[2] == "import":
             modules.append(line[1])
 
     external_modules = []
