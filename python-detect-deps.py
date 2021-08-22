@@ -14,6 +14,9 @@ def deduplicate(lst: List[Any]) -> List[Any]:
 def get_internal_modules() -> List[str]:
     items = list(sys.builtin_module_names)
     items += os.listdir(f"/usr/lib/python{sys.version_info.major}.{sys.version_info.minor}/")
+    dynlibs = os.listdir(f"/usr/lib/python{sys.version_info.major}.{sys.version_info.minor}/lib-dynload")
+    for dynlib in dynlibs:
+        items.append(dynlib.split(".")[0])
     modules = []
     for item in items:
         if item == "site-packages":
