@@ -42,7 +42,11 @@ def process_file(path: str, internal_modules: List[str]) -> List[str]:
         if len(line) == 0:
             continue
         if line[0] == "import":
-            modules += line[1:]
+            for i, module in enumerate(line[1:]):
+                if module == "as":
+                    assert i != 0 # import as
+                    break
+                modules.append(module)
         elif line[0] == "from" and len(line) >= 3 and line[2] == "import":
             modules.append(line[1])
 
