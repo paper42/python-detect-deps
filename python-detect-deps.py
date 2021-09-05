@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-import pkgutil
 import os
 import sys
 from typing import List, Any
+
 
 def deduplicate(lst: List[Any]) -> List[Any]:
     dedup_lst = []
@@ -11,10 +11,15 @@ def deduplicate(lst: List[Any]) -> List[Any]:
             dedup_lst.append(item)
     return dedup_lst
 
+
 def get_internal_modules() -> List[str]:
     items = list(sys.builtin_module_names)
-    items += os.listdir(f"/usr/lib/python{sys.version_info.major}.{sys.version_info.minor}/")
-    dynlibs = os.listdir(f"/usr/lib/python{sys.version_info.major}.{sys.version_info.minor}/lib-dynload")
+    items += os.listdir(
+        f"/usr/lib/python{sys.version_info.major}.{sys.version_info.minor}/"
+    )
+    dynlibs = os.listdir(
+        f"/usr/lib/python{sys.version_info.major}.{sys.version_info.minor}/lib-dynload"
+    )
     for dynlib in dynlibs:
         items.append(dynlib.split(".")[0])
     modules = []
@@ -28,6 +33,7 @@ def get_internal_modules() -> List[str]:
             name = item
         modules.append(name)
     return modules
+
 
 def process_file(path: str, internal_modules: List[str]) -> List[str]:
     text = ""
@@ -44,7 +50,7 @@ def process_file(path: str, internal_modules: List[str]) -> List[str]:
         if line[0] == "import":
             for i, module in enumerate(line[1:]):
                 if module == "as":
-                    assert i != 0 # import as
+                    assert i != 0  # import as
                     break
                 modules.append(module)
         elif line[0] == "from" and len(line) >= 3 and line[2] == "import":
@@ -63,34 +69,38 @@ def process_file(path: str, internal_modules: List[str]) -> List[str]:
             external_modules.append(module_name)
     return external_modules
 
+
 def process_dir(path: str, internal_modules: List[str]) -> List[str]:
     external_modules = []
     for root, dirs, files in os.walk(path):
         for name in files:
             if not name.endswith(".py"):
                 continue
-            external_modules += process_file(os.path.join(root, name),
-                                             internal_modules=internal_modules)
+            external_modules += process_file(
+                os.path.join(root, name), internal_modules=internal_modules
+            )
         for name in dirs:
-            external_modules += process_dir(os.path.join(root, name),
-                                            internal_modules=internal_modules)
+            external_modules += process_dir(
+                os.path.join(root, name), internal_modules=internal_modules
+            )
     return external_modules
+
 
 def process(path: str, internal_modules: List[str]) -> List[str]:
     if os.path.isdir(path):
         return process_dir(path=path, internal_modules=internal_modules)
     return process_file(path=path, internal_modules=internal_modules)
 
+
 def cli() -> None:
     internal_modules = get_internal_modules()
     external_modules = []
     for arg in sys.argv[1:]:
-        external_modules += process(path=arg,
-                                    internal_modules=internal_modules)
+        external_modules += process(path=arg, internal_modules=internal_modules)
 
     for module in deduplicate(external_modules):
         print(module)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     cli()
