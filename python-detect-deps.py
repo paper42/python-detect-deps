@@ -52,6 +52,8 @@ def process_file(path: str, internal_modules: List[str]) -> List[str]:
                 if module == "as":
                     assert i != 0  # import as
                     break
+                if module.startswith("#"):
+                    break
                 modules.append(module)
         elif line[0] == "from" and len(line) >= 3 and line[2] == "import":
             modules.append(line[1])
